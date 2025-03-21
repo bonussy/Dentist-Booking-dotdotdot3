@@ -1,8 +1,8 @@
 const Dentist = require('../models/Dentist');
 
-//@desc Get all dentists
-//@rotue GET /api/v1/dentists
-//@access Public
+//@desc     Get all dentists
+//@rotue    GET /api/v1/dentists
+//@access   Public
 exports.getDentists = async (req, res, next) => {
     try{
         const dentists = await Dentist.find();
