@@ -16,6 +16,21 @@ const DentistSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add an area of expertise'],
     },
+    createdAt:{
+        type: Date,
+        default: Date.now
+    }
+}, {
+    toJSON: {virtuals: true},
+    toObject: {virtuals: true}
+});
+
+//Reverse populate with virtuals
+DentistSchema.virtual('bookings',{
+    ref: 'Booking',
+    localField: '_id',
+    foreignField: 'dentist',
+    justOne: false
 });
 
 module.exports = mongoose.model('Dentist', DentistSchema);
