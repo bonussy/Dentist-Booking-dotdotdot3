@@ -4,8 +4,7 @@ const BookingSchema = new mongoose.Schema({
     user:{
        type: mongoose.Schema.ObjectId,
        ref: 'User',
-       required: true,
-       unique: true
+       required: true
     },
     dentist:{
         type: mongoose.Schema.ObjectId,
@@ -18,8 +17,8 @@ const BookingSchema = new mongoose.Schema({
     },
     status: { 
         type: String, 
-        enum: ['active', 'completed', 'canceled'], 
-        default: 'active' 
+        enum: ['booked', 'completed', 'canceled'], 
+        default: 'booked' 
     },
     createdAt:{
         type: Date,
