@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Dentist = require('../models/Dentist');
+const mongoose = require('mongoose');
 
 // @desc     Get all bookings
 // @route    GET /api/v1/bookings
@@ -91,6 +92,16 @@ exports.addBooking = async (req,res,next) => {
         })
 
     } catch(err) {
+        // Handle validation errors
+        if (err.name === 'ValidationError') {
+            console.log(`Validation Error: ${err.message}`);
+            return res.status(400).json({
+                success: false,
+                message: err.message
+            });
+        }
+
+        // Log unexpected errors
         console.log(err);
         return res.status(500).json({
             success: false,
@@ -135,10 +146,20 @@ exports.updateBooking = async (req,res,next) => {
         })
 
     } catch(err) {
+        // Handle validation errors
+        if (err.name === 'ValidationError') {
+            console.log(`Validation Error: ${err.message}`);
+            return res.status(400).json({
+                success: false,
+                message: err.message
+            });
+        }
+
+        // Log unexpected errors
         console.log(err);
         return res.status(500).json({
             success: false,
-            message: 'Cannot update Booking'
+            message: 'Cannot create Booking'
         });
 
     }

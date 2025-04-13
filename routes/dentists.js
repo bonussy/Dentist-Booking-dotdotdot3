@@ -11,7 +11,7 @@ const bookingRouter = require('./bookings');
 router.use('/:dentistId/bookings/', bookingRouter);
 
 router.route('/')
-    .get(getDentists)
+    .get(protect, getDentists)
     .post(protect, authorize('admin'), createDentist);
 
 module.exports = router;
