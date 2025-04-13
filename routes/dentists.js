@@ -1,5 +1,6 @@
 const express = require('express');
-const { getDentists } = require('../controllers/dentists');
+const { getDentists, createDentist } = require('../controllers/dentists');
+const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -9,6 +10,8 @@ const bookingRouter = require('./bookings');
 //Re-route into other resource routers
 router.use('/:dentistId/bookings/', bookingRouter);
 
-router.route('/').get(getDentists);
+router.route('/')
+    .get(getDentists)
+    .post(protect, authorize('admin'), createDentist);
 
 module.exports = router;
