@@ -26,67 +26,27 @@ exports.getBookingsByAdmin = async (req, res, next) => {
     }
 };
 
-//@desc     Add bookings by admin
-//@route    POST /api/v1/admins/bookings
+//@desc     Get single booking
+//@route    GET /api/v1/admins/booking/:id
 //@access   Private
-exports.addBookingByAdmin = async (req, res, next) => {
-    try {
-        // Ensure admin is making the request
-        if (req.user.role !== 'admin') {
-            return res.status(401).json({
-                success: false,
-                message: "Only admins can create bookings on behalf of users."
-            });
-        }
+exports.getBookingByAdmin = async(req, res, next) => {
+    try{
+        const booking = await Booking.findById(req.params.id);
 
-        const { user, dentist, date, status } = req.body;
-
-        // Validate if both user and dentist are provided
-        if (!user || !dentist) {
-            return res.status(400).json({
-                success: false,
-                message: "Both user and dentist IDs must be provided."
-            });
-        }
-
-        const dentistExists = await Dentist.findById(dentist);
-        if (!dentistExists) {
+        if (!booking){
             return res.status(404).json({
                 success: false,
-                message: `No dentist found with ID ${dentist}`
+                message: `No booking found with id ${req.params.id}`
             });
         }
 
-        // Check if the requested time conflicts with existing bookings
-        const overlapBooking = await Booking.findOne({
-            dentist,
-            status: 'booked',
-            date
-        });
-
-        if (overlapBooking) {
-            return res.status(400).json({
-                success: false,
-                message: "The requested time overlaps with an existing booking for this dentist."
-            });
-        }
-
-        // Create booking with the provided user and dentist details
-        const booking = await Booking.create({ user, dentist, date, status });
-
-        res.status(201).json({
-            success: true,
-            data: booking
-        });
-
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({
-            success: false,
-            message: "Cannot create Booking"
-        });
+        res.status(200).json({success:true,data:booking});
+    }catch(err){
+        res.status(400).json({success:false});
     }
+    
 };
+
 
 //@desc     Update booking
 //@route    PUT /api/v1/admins/bookings/:id
