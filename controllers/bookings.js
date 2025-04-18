@@ -70,6 +70,8 @@ exports.addBooking = async (req,res,next) => {
         }
 
         //User can't not book overlap booking with the same dentist
+        //date format: 2025-04-01T14:00:00.000+00:00
+
         const overlapBooking = await Booking.findOne({
             dentist: req.params.dentistId,
             status: 'booked',
