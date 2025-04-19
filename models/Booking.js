@@ -14,13 +14,13 @@ const BookingSchema = new mongoose.Schema({
     date: {
         type: Date,
         required: true,
-        validate: {
-            validator: function (value) {
-                // Ensure the date has no minutes or seconds (only hours)
-                return value.getMinutes() === 0 && value.getSeconds() === 0;
-            },
-            message: 'Booking time must be on the hour (e.g., 14:00, 15:00).'
-        }
+        // validate: {
+        //     validator: function (value) {
+        //         // Ensure the date has no minutes or seconds (only hours)
+        //         return value.getMinutes() === 0 && value.getSeconds() === 0;
+        //     },
+        //     message: 'Booking time must be on the hour (e.g., 14:00, 15:00).'
+        // }
     },
     status: {
         type: String,

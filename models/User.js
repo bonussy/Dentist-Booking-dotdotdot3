@@ -5,24 +5,24 @@ const jwt = require('jsonwebtoken');
 const UserSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'Please add a name'], // Validation: Name is required
-        unique: true, // Validation: Name must be unique
+        required: [true, 'Please add a name'], 
+        unique: true, 
         trim: true,
-        maxlength: [50, 'Name cannot be more than 50 characters'] // Validation: Max length of 50 characters
+        maxlength: [50, 'Name cannot be more than 50 characters'] 
     },
     telephone: {
         type: String,
-        required: [true, 'Please add a telephone number'], // Validation: Telephone is required
-        unique: true, // Validation: Telephone must be unique
+        required: [true, 'Please add a telephone number'], 
+        unique: true, 
         match: [
-            /^(\+66|0)[689]\d{8}$/, // Validation: Must match the Thai phone number format
+            /^(\+66|0)[689]\d{8}$/, 
             'Please add a valid telephone number'
         ]
     },
     email: {
         type: String,
-        required: [true, 'Please add an email'], // Validation: Email is required
-        unique: true, // Validation: Email must be unique
+        required: [true, 'Please add an email'], 
+        unique: true, 
         match: [
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\0-9]+\.)+[a-zA-Z]{2,}))$/, // Validation: Must match email format
             'Please add a valid email'
@@ -30,13 +30,13 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Please add a password'], // Validation: Password is required
-        minlength: 6, // Validation: Minimum length of 6 characters
+        required: [true, 'Please add a password'], 
+        minlength: 6, 
         select: false
     },
     role: {
         type: String,
-        enum: ['user', 'admin'], // Validation: Role must be either 'user' or 'admin'
+        enum: ['user', 'admin'], 
         default: 'user'
     },
     resetPasswordToken: String,

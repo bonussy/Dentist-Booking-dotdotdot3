@@ -5,12 +5,52 @@ const User = require('../models/User');
 //@access   Public
 exports.register = async (req,res,next) => {
     try{
-        console.log(req.body);
 
         const {name, telephone, email, password, role} = req.body;
+
+        // Validate required fields
+        if (!name || !telephone || !email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide all required fields: name, telephone, email, and password'
+            });
+        }
+
+        // Validate name length
+        if (name.length > 50) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name cannot be more than 50 characters'
+            });
+        }
+
+        // Validate telephone format
+        const telephoneRegex = /^(\+66|0)[689]\d{8}$/;
+        if (!telephoneRegex.test(telephone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a valid telephone number'
+            });
+        }
+
+        // Validate email format
+        const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a valid email address'
+            });
+        }
+
+        // Validate password length
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 6 characters long'
+            });
+        }
         
         // Create user
-        // Validation is handled in the User model (e.g., required fields, unique constraints, regex patterns)
         const user = await User.create({
             name,
             telephone,
@@ -21,8 +61,6 @@ exports.register = async (req,res,next) => {
 
 
         //Create token
-        // const token = user.getSignedJwtToken();
-        // res.status(200).json({success: true, token});
         sendTokenResponse(user, 201, res);
 
     } catch(err) {

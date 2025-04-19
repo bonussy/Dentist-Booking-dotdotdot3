@@ -6,23 +6,14 @@ const mongoose = require('mongoose');
 // @route    GET /api/v1/bookings
 // @access   private
 exports.getBookings = async (req,res,next) => {
-    let query;
-
+    
     //Registered user can see only their bookings!
-    if(req.user.role !== 'admin'){
-        query = Booking.find({user: req.user.id}).populate({
-            path: 'dentist',
-            select: 'name yearsOfExperience areaOfExpertise'
-        });
-    } else {
-        query = Booking.find().populate({
-            path: 'dentist',
-            select: 'name yearsOfExperience areaOfExpertise'
-        });
-    }
-
+   
     try{
-        const bookings = await query;
+        const bookings = await Booking.find({user: req.user.id}).populate({
+            path: 'dentist',
+            select: 'name yearsOfExperience areaOfExpertise'
+        });
 
         res.status(200).json({
             success: true,
@@ -39,11 +30,71 @@ exports.getBookings = async (req,res,next) => {
     }
 };
 
-//@desc     Add bookings
+//@desc     Get single booking
+//@route    GET /api/v1/booking/:id
+//@access   Private
+exports.getBooking = async(req, res, next) => {
+    try{
+        const booking = await Booking.findOne({
+            _id: req.params.id,
+            user: req.user.id
+        });
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: `No booking found with id ${req.params.id} for this user`
+            });
+        }
+
+        res.status(200).json({success:true,data:booking});
+    }catch(err){
+        res.status(400).json({success:false});
+    }
+    
+};
+
+//@desc     Create bookings
 //@route    POST /api/v1/dentists/:dentistId/bookings
 //@acess    private
-exports.addBooking = async (req,res,next) => {
+exports.createBooking = async (req,res,next) => {
     try{
+        
+        const { date } = req.body;
+
+        // Validate required fields
+        if (!date) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a booking date'
+            });
+        }
+
+        // Validate date format
+        const bookingDate = new Date(date);
+        if (isNaN(bookingDate.getTime())) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid date format. Please provide a valid date.'
+            });
+        }
+
+        // // Validate that the date is not in the past
+        // if (bookingDate < new Date()) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Booking date cannot be in the past.'
+        //     });
+        // }
+
+        // Validate that the time is on the hour
+        if (bookingDate.getMinutes() !== 0 || bookingDate.getSeconds() !== 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Booking time must be on the hour (e.g., 14:00, 15:00).'
+            });
+        }
+        
         req.body.dentist = req.params.dentistId;
 
         const dentist = await Dentist.findById(req.params.dentistId);
@@ -117,6 +168,74 @@ exports.addBooking = async (req,res,next) => {
 //@access   private
 exports.updateBooking = async (req,res,next) => {
     try{
+
+        const { date, dentistId } = req.body;
+
+        // Validate date if provided
+        if (date) {
+            const bookingDate = new Date(date);
+            if (isNaN(bookingDate.getTime())) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid date format. Please provide a valid date.'
+                });
+            }
+
+            // Validate that the date is not in the past
+            // if (bookingDate < new Date()) {
+            //     return res.status(400).json({
+            //         success: false,
+            //         message: 'Booking date cannot be in the past.'
+            //     });
+            // }
+
+            // Validate that the time is on the hour
+            if (bookingDate.getMinutes() !== 0 || bookingDate.getSeconds() !== 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Booking time must be on the hour (e.g., 14:00, 15:00).'
+                });
+            }
+        }
+
+        // Validate dentistId if provided
+        if (dentistId) {
+            // Check if dentistId is a valid ObjectId
+            if (!mongoose.Types.ObjectId.isValid(dentistId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid dentist ID format.'
+                });
+            }
+
+            // Check if the dentist exists
+            const dentist = await Dentist.findById(dentistId);
+            if (!dentist) {
+                return res.status(404).json({
+                    success: false,
+                    message: `No dentist found with the id of ${dentistId}`
+                });
+            }
+
+            // Check for overlapping bookings with the new dentist
+            if (date) {
+                const overlapBooking = await Booking.findOne({
+                    dentist: dentistId,
+                    status: 'booked',
+                    date: date
+                });
+
+                if (overlapBooking) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'The requested time overlaps with an existing booking for the new dentist.'
+                    });
+                }
+            }
+        }
+
+        ///
+
         let booking = await Booking.findById(req.params.id);
 
         if(!booking){
@@ -161,7 +280,7 @@ exports.updateBooking = async (req,res,next) => {
         console.log(err);
         return res.status(500).json({
             success: false,
-            message: 'Cannot create Booking'
+            message: 'Cannot update Booking'
         });
 
     }
