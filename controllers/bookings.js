@@ -38,6 +38,9 @@ exports.getBooking = async(req, res, next) => {
         const booking = await Booking.findOne({
             _id: req.params.id,
             user: req.user.id
+        }).populate({
+            path: 'dentist',
+            select: 'name yearsOfExperience areaOfExpertise'
         });
 
         if (!booking) {

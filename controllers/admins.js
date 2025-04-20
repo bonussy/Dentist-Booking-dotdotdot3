@@ -31,7 +31,10 @@ exports.getBookingsByAdmin = async (req, res, next) => {
 //@access   Private
 exports.getBookingByAdmin = async(req, res, next) => {
     try{
-        const booking = await Booking.findById(req.params.id);
+        const booking = await Booking.findById(req.params.id).populate({
+            path: 'dentist',
+            select: 'name yearsOfExperience areaOfExpertise'
+        });
 
         if (!booking){
             return res.status(404).json({
